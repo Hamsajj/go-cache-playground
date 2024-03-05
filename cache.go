@@ -9,7 +9,7 @@ import (
 type Cache[T any] struct {
 	ctx context.Context
 	// The cache is a map of strings to strings
-	items map[string]item[T]
+	items map[string]cacheItem[T]
 	// The time to live for each item in the cache
 	ttl time.Duration
 	// RW mutex to protect the cache
@@ -22,9 +22,9 @@ type Cache[T any] struct {
 	evictionInterval time.Duration
 }
 
-type item[T any] struct {
+type cacheItem[T any] struct {
 	value     T
-	expiresAt time.Time
+	expiresAt int64
 }
 
 const defaultEvictionInterval = time.Second
@@ -34,7 +34,7 @@ func NewCache[T any](ctx context.Context, ttl time.Duration) *Cache[T] {
 	stopChan := make(chan bool)
 	c := &Cache[T]{
 		ctx:              ctx,
-		items:            make(map[string]item[T]),
+		items:            make(map[string]cacheItem[T]),
 		ttl:              ttl,
 		mutex:            &sync.RWMutex{},
 		stopEviction:     stopChan,
@@ -48,9 +48,9 @@ func NewCache[T any](ctx context.Context, ttl time.Duration) *Cache[T] {
 func (c *Cache[T]) Set(key string, value T) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	c.items[key] = item[T]{
+	c.items[key] = cacheItem[T]{
 		value:     value,
-		expiresAt: time.Now().Add(c.ttl),
+		expiresAt: time.Now().Add(c.ttl).UnixNano(),
 	}
 }
 
@@ -59,6 +59,9 @@ func (c *Cache[T]) Get(key string) (T, bool) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	item, ok := c.items[key]
+	if time.Now().UnixNano() > item.expiresAt {
+		return item.value, false
+	}
 	return item.value, ok
 }
 
@@ -69,17 +72,15 @@ func (c *Cache[T]) Delete(key string) {
 	delete(c.items, key)
 }
 
+// DeleteExpired removes all expired items from the cache
 func (c *Cache[T]) DeleteExpired() {
-	c.mutex.RLock()
-	toDelete := make([]string, 0)
+	now := time.Now().UnixNano()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	for key, item := range c.items {
-		if time.Now().After(item.expiresAt) {
-			toDelete = append(toDelete, key)
+		if now > item.expiresAt {
+			delete(c.items, key)
 		}
-	}
-	c.mutex.RUnlock()
-	for _, key := range toDelete {
-		c.Delete(key)
 	}
 }
 
