@@ -12,7 +12,7 @@ func TestNewCache(t *testing.T) {
 	ttl := 10 * time.Second
 	cache := NewCache[string](context.Background(), ttl)
 	if cache == nil {
-		t.Errorf("Expected a cache but got nil")
+		t.Fatalf("Expected a cache but got nil")
 	}
 	if cache.ttl != ttl {
 		t.Errorf("Expected %d but got %d", ttl, cache.ttl)
@@ -48,12 +48,12 @@ func TestCache_Get(t *testing.T) {
 		value:     "expired",
 		expiresAt: time.Now().Add(-10 * time.Second).UnixNano(),
 	}
-	val, ok = cache.Get("expiredKey")
+	_, ok = cache.Get("expiredKey")
 	if ok {
 		t.Errorf("Expected 'expiredKey' to return false indicating value is not ok")
 	}
 
-	val, ok = cache.Get("nonExistentKey")
+	_, ok = cache.Get("nonExistentKey")
 	if ok {
 		t.Errorf("Expected 'nonExistentKey' to be absent from the cache")
 	}

@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"embarkCache/cache"
+	"embarkCache/config"
 	logger2 "embarkCache/logger"
 	"embarkCache/server"
 	"fmt"
+	"github.com/joho/godotenv"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,17 +18,33 @@ import (
 )
 
 func run(ctx context.Context, stdout io.Writer, stderr io.Writer) error {
+
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
+
+	// loading config
+	err := godotenv.Load()
+	if err != nil {
+		return fmt.Errorf("error lodaing dotenv %w", err)
+	}
+	conf, err := config.New()
+	if err != nil {
+		return fmt.Errorf("error lodaing config %w", err)
+	}
+
+	// creating logger
 	logger := logger2.New(logger2.LogConfig{
 		ConsoleOut: stdout,
 		ConsoleErr: stderr,
 		UseColor:   true,
+		Debug:      conf.Debug,
 	})
-	c := cache.NewCache[string](ctx, time.Minute*30)
+
+	// creating server
+	c := cache.NewCache[string](ctx, time.Duration(conf.TTLSec)*time.Second)
 	srv := server.New(&logger, c)
 	httpServer := &http.Server{
-		Addr:    "localhost:3000",
+		Addr:    net.JoinHostPort(conf.Host, conf.Port),
 		Handler: srv,
 	}
 
