@@ -17,7 +17,11 @@ import (
 func run(ctx context.Context, stdout io.Writer, stderr io.Writer) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
-	logger := logger2.New(stdout, stderr)
+	logger := logger2.New(logger2.LogConfig{
+		ConsoleOut: stdout,
+		ConsoleErr: stderr,
+		UseColor:   true,
+	})
 	c := cache.NewCache[string](ctx, time.Minute*30)
 	srv := server.New(&logger, c)
 	httpServer := &http.Server{
