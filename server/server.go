@@ -1,4 +1,4 @@
-package http
+package server
 
 import (
 	"github.com/rs/zerolog"
@@ -19,7 +19,7 @@ type Cache interface {
 	Get(key string) (string, bool)
 }
 
-func NewServer(logger *zerolog.Logger, cache Cache) http.Handler {
+func New(logger *zerolog.Logger, cache Cache) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{key}", get(cache, logger))
 	mux.HandleFunc("POST /{key}", store(cache, logger))
@@ -37,7 +37,7 @@ func get(cache Cache, logger *zerolog.Logger) http.HandlerFunc {
 		logger.Trace().Str("key", key).Msg("Received GET key request")
 		value, ok := cache.Get(key)
 		if !ok {
-			logger.Info().Str("key", key).Msg("Cache miss.")
+			logger.Trace().Str("key", key).Msg("Cache miss.")
 			http.Error(w, errNotFoundResponse, http.StatusNotFound)
 			return
 		}
@@ -46,7 +46,7 @@ func get(cache Cache, logger *zerolog.Logger) http.HandlerFunc {
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to write response")
 		}
-		logger.Info().Str("key", key).Msg("Cache hit.")
+		logger.Trace().Str("key", key).Msg("Cache hit.")
 	}
 }
 

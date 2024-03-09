@@ -1,4 +1,4 @@
-package http
+package server
 
 import (
 	"fmt"
@@ -72,7 +72,7 @@ func TestServer_Get(t *testing.T) {
 				GetValue: tt.expectedValue,
 			}
 			logger := zerolog.Nop()
-			handler := NewServer(&logger, cache)
+			handler := New(&logger, cache)
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s", tt.key), nil)
 			responseRecorder := httptest.NewRecorder()
 			handler.ServeHTTP(responseRecorder, req)
@@ -127,7 +127,7 @@ func TestServer_Post(t *testing.T) {
 			t.Parallel()
 			cache := &mockCache{}
 			logger := zerolog.Nop()
-			handler := NewServer(&logger, cache)
+			handler := New(&logger, cache)
 			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/%s", tt.key), strings.NewReader(tt.body))
 			responseRecorder := httptest.NewRecorder()
 			handler.ServeHTTP(responseRecorder, req)
