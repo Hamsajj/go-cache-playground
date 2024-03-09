@@ -66,7 +66,7 @@ func run(ctx context.Context, stdout io.Writer, stderr io.Writer) error {
 		// make a new context for the Shutdown (thanks Alessandro Rosetti)
 		logger.Info().Msg("shutting down")
 		shutdownCtx := context.Background()
-		shutdownCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(shutdownCtx, 10*time.Second)
 		defer cancel()
 		if err := httpServer.Shutdown(shutdownCtx); err != nil {
 			logger.Error().Err(err).Msg("error shutting down http server")
