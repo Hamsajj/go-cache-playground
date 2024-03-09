@@ -6,6 +6,7 @@ import (
 	"embarkCache/config"
 	logger2 "embarkCache/logger"
 	"embarkCache/server"
+	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
 	"io"
@@ -25,7 +26,9 @@ func run(ctx context.Context, stdout io.Writer, stderr io.Writer) error {
 	// loading config
 	err := godotenv.Load()
 	if err != nil {
-		return fmt.Errorf("error lodaing dotenv %w", err)
+		if !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("error lodaing dotenv %w", err)
+		}
 	}
 	conf, err := config.New()
 	if err != nil {

@@ -1,0 +1,14 @@
+version: '3'
+services:
+  cache-api:
+    container_name: cache-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      HOST: '0.0.0.0'
+      PORT: '80'
+      DEBUG: 'falseg'
+      TTL_SECONDS: '1800'

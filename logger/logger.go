@@ -40,10 +40,9 @@ func New(config LogConfig) zerolog.Logger {
 			},
 		},
 	)
-	level := zerolog.WarnLevel
+	level := zerolog.InfoLevel
 	if config.Debug {
 		level = zerolog.DebugLevel
-
 	}
 	return zerolog.New(writer).With().Timestamp().Logger().Level(level)
 }

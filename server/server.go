@@ -34,10 +34,10 @@ func get(cache Cache, logger *zerolog.Logger) http.HandlerFunc {
 			http.Error(w, errBadRequestResponse, http.StatusBadRequest)
 			return
 		}
-		logger.Trace().Str("key", key).Msg("Received GET key request")
+		logger.Debug().Str("key", key).Msg("Received GET key request")
 		value, ok := cache.Get(key)
 		if !ok {
-			logger.Trace().Str("key", key).Msg("Cache miss.")
+			logger.Debug().Str("key", key).Msg("Cache miss.")
 			http.Error(w, errNotFoundResponse, http.StatusNotFound)
 			return
 		}
@@ -46,7 +46,7 @@ func get(cache Cache, logger *zerolog.Logger) http.HandlerFunc {
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to write response")
 		}
-		logger.Trace().Str("key", key).Msg("Cache hit.")
+		logger.Debug().Str("key", key).Msg("Cache hit.")
 	}
 }
 
@@ -57,7 +57,7 @@ func store(cache Cache, logger *zerolog.Logger) http.HandlerFunc {
 			http.Error(w, errBadRequestResponse, http.StatusBadRequest)
 			return
 		}
-		logger.Trace().Str("key", key).Msg("Received Post key request")
+		logger.Debug().Str("key", key).Msg("Received Post key request")
 		value, err := io.ReadAll(r.Body)
 		if err != nil {
 			logger.Warn().Err(err).Msg("Failed to read request body")
