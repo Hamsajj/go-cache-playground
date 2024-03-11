@@ -2,25 +2,50 @@ package cache
 
 import (
 	"context"
+	"embarkCache/config"
 	"fmt"
 	"sync"
 	"testing"
 	"time"
 )
 
+func createNewCache() *Cache[string] {
+	return NewCache[string](context.Background(), config.CacheConfig{
+		TTLSec:                   10,
+		EvictionIntervalMilliSec: 0,
+	})
+}
+
 func TestNewCache(t *testing.T) {
-	ttl := 10 * time.Second
-	cache := NewCache[string](context.Background(), ttl)
-	if cache == nil {
-		t.Fatalf("Expected a cache but got nil")
-	}
-	if cache.ttl != ttl {
-		t.Errorf("Expected %d but got %d", ttl, cache.ttl)
-	}
+	t.Run("NewCache with default values", func(t *testing.T) {
+		cache := NewCache[string](context.Background(), config.CacheConfig{})
+		if cache == nil {
+			t.Fatalf("Expected a cache but got nil")
+		}
+		if cache.ttl != defaultTTL {
+			t.Errorf("Expected ttl to be %d but got %d", defaultTTL, cache.ttl)
+		}
+		if cache.evictionInterval != defaultEvictionInterval {
+			t.Errorf("Expected interval to be %d but got %d", defaultEvictionInterval, cache.evictionInterval)
+		}
+	})
+
+	t.Run("NewCache with custom values", func(t *testing.T) {
+		cache := NewCache[string](context.Background(), config.CacheConfig{
+			TTLSec:                   20,
+			EvictionIntervalMilliSec: 1000,
+		})
+		if cache.ttl != 20*time.Second {
+			t.Errorf("Expected ttl to be %d but got %d", 20*time.Second, cache.ttl)
+		}
+		if cache.evictionInterval != defaultEvictionInterval {
+			t.Errorf("Expected interval to be %d but got %d", defaultEvictionInterval, cache.evictionInterval)
+		}
+	})
 }
 
 func TestCache_Set(t *testing.T) {
-	cache := NewCache[string](context.Background(), 10*time.Second)
+	cache := createNewCache()
 	cache.Set("key", "value")
 	assertValueExists(t, cache, "key", "value")
 
@@ -31,7 +56,7 @@ func TestCache_Set(t *testing.T) {
 }
 
 func TestCache_Get(t *testing.T) {
-	cache := NewCache[string](context.Background(), 10*time.Second)
+	cache := createNewCache()
 	cache.items["key"] = cacheItem[string]{
 		value:     "value",
 		expiresAt: time.Now().Add(10 * time.Second).UnixNano(),
@@ -60,7 +85,7 @@ func TestCache_Get(t *testing.T) {
 }
 
 func TestCache_Delete(t *testing.T) {
-	cache := NewCache[string](context.Background(), 10*time.Second)
+	cache := createNewCache()
 	cache.items["key"] = cacheItem[string]{
 		value:     "value",
 		expiresAt: time.Now().Add(10 * time.Second).UnixNano(),
@@ -142,7 +167,7 @@ func TestCache_Eviction(t *testing.T) {
 }
 
 func TestCache_StopEviction(t *testing.T) {
-	cache := NewCache[string](context.Background(), 10*time.Second)
+	cache := createNewCache()
 	if cache.isEvictionRunning == false {
 		t.Errorf("Expected eviction to be running")
 	}
@@ -175,7 +200,10 @@ func assertValueExists(t *testing.T, cache *Cache[string], key string, expectedV
 
 func BenchmarkCache_DeleteExpired(b *testing.B) {
 	b.StopTimer()
-	cache := NewCache[string](context.Background(), -1*time.Second)
+	cache := NewCache[string](context.Background(), config.CacheConfig{
+		TTLSec:                   -1,
+		EvictionIntervalMilliSec: 0,
+	})
 	cache.StopEviction()
 	// set half of the items to be expired
 	for i := 0; i < b.N; i++ {

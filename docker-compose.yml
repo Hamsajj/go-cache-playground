@@ -8,7 +8,9 @@ services:
     ports:
       - "8080:80"
     environment:
+      SERVICE_NAME: 'embark'
       HOST: '0.0.0.0'
       PORT: '80'
-      DEBUG: 'falseg'
-      TTL_SECONDS: '1800'
+      DEBUG: 'false'
+      TTL_SECONDS: '1800' # 30 minutes
+      EVICTION_INTERVAL_MS: '1000' # 1 second

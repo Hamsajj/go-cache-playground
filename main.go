@@ -44,7 +44,7 @@ func run(ctx context.Context, stdout io.Writer, stderr io.Writer) error {
 	})
 
 	// creating server
-	c := cache.NewCache[string](ctx, time.Duration(conf.TTLSec)*time.Second)
+	c := cache.NewCache[string](ctx, conf.Cache)
 	srv := server.New(&logger, c)
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(conf.Host, conf.Port),

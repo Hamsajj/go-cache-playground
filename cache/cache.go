@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"embarkCache/config"
 	"sync"
 	"time"
 )
@@ -27,18 +28,30 @@ type cacheItem[T any] struct {
 	expiresAt int64
 }
 
-const defaultEvictionInterval = time.Second
+const (
+	defaultEvictionInterval = time.Second
+	defaultTTL              = 30 * time.Minute
+)
 
 // NewCache creates a new cache with the given time to live
-func NewCache[T any](ctx context.Context, ttl time.Duration) *Cache[T] {
+func NewCache[T any](ctx context.Context, conf config.CacheConfig) *Cache[T] {
 	stopChan := make(chan bool)
+	evictionInterval := defaultEvictionInterval
+	if conf.EvictionIntervalMilliSec != 0 {
+		evictionInterval = time.Duration(conf.EvictionIntervalMilliSec) * time.Millisecond
+	}
+
+	ttl := defaultTTL
+	if conf.TTLSec != 0 {
+		ttl = time.Duration(conf.TTLSec) * time.Second
+	}
 	c := &Cache[T]{
 		ctx:              ctx,
 		items:            make(map[string]cacheItem[T]),
 		ttl:              ttl,
 		mutex:            &sync.RWMutex{},
 		stopEviction:     stopChan,
-		evictionInterval: defaultEvictionInterval,
+		evictionInterval: evictionInterval,
 	}
 	c.startEviction()
 	return c
