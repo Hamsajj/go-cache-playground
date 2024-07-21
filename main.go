@@ -1,14 +1,13 @@
 package main
 
 import (
+	"cache-api/cache"
+	"cache-api/config"
+	logger2 "cache-api/logger"
+	"cache-api/server"
 	"context"
-	"embarkCache/cache"
-	"embarkCache/config"
-	logger2 "embarkCache/logger"
-	"embarkCache/server"
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
 	"io"
 	"net"
 	"net/http"
@@ -16,6 +15,8 @@ import (
 	"os/signal"
 	"sync"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func run(ctx context.Context, stdout io.Writer, stderr io.Writer) error {

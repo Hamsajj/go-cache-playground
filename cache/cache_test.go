@@ -1,8 +1,8 @@
 package cache
 
 import (
+	"cache-api/config"
 	"context"
-	"embarkCache/config"
 	"fmt"
 	"sync"
 	"testing"

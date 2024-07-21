@@ -6,11 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+    - "8080:8080"
     environment:
-      SERVICE_NAME: 'embark'
+      SERVICE_NAME: 'cache-api'
       HOST: '0.0.0.0'
-      PORT: '80'
+      PORT: '8080'
       DEBUG: 'false'
       TTL_SECONDS: '1800' # 30 minutes
       EVICTION_INTERVAL_MS: '1000' # 1 second
