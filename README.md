@@ -1,14 +1,8 @@
-# Embark Coding Assignment
+# Go cache, a playground
 
-#### Hamid Sajjadi
 
-This repository includes the code for the Embark Coding assignment.
-The assignment asked for the following:
-
-> Create a simple in-memory cache with an HTTP interface
-> Interface
->- HTTP POST /<key> with the value as UTF-8 body
->- HTTP GET /<key> replies with the value as body or 404 if no such key exists
+This repository acts as a playground for me to play around and learn different things. Open telemetry, kuber, etc.
+It implements a simple cache implemented in Go and with an API
 
 ## Build and Run
 
