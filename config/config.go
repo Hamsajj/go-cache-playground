@@ -15,15 +15,16 @@ type Config struct {
 	Debug       bool   `envconfig:"debug" default:"false"`
 	Host        string `envconfig:"host" default:"0.0.0.0"`
 	Port        string `envconfig:"port" default:"8080"`
+	UseRedis    bool   `envconfig:"use_redis" default:"false"`
 	RedisConfig RedisConfig
 	Cache       CacheConfig // default is 30 minutes
 }
 
 type RedisConfig struct {
-	Host     string `envconfig:"host" default:"localhost"`
-	Username string `envconfig:"username" default:"localhost"`
-	Password string `envconfig:"password" default:""`
-	DB       int    `envconfig:"db" default:"0"`
+	Host     string `envconfig:"redis_host" default:"localhost"`
+	Username string `envconfig:"reids_username" default:"localhost"`
+	Password string `envconfig:"redis_password" default:""`
+	DB       int    `envconfig:"redis_db" default:"0"`
 }
 
 func NewWithName(serviceName string) (Config, error) {

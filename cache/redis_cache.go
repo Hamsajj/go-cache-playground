@@ -27,7 +27,7 @@ func NewRedisCache(
 	cacheConfig *config.CacheConfig,
 	redisConfig *config.RedisConfig,
 	logger *zerolog.Logger,
-) *RedisCache {
+) (*RedisCache, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     redisConfig.Host,
 		Username: redisConfig.Username,
@@ -35,11 +35,16 @@ func NewRedisCache(
 		DB:       redisConfig.DB,
 	})
 
+	_, err := client.Ping(ctx).Result()
+	if err != nil {
+		return nil, err
+	}
+
 	return &RedisCache{
 		ctx:    ctx,
 		logger: logger,
 		rdb:    client,
-		ttl:    time.Duration(cacheConfig.TTLSec) * time.Second}
+		ttl:    time.Duration(cacheConfig.TTLSec) * time.Second}, nil
 }
 
 func (r RedisCache) Set(key string, value string) error {

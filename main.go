@@ -44,8 +44,20 @@ func run(ctx context.Context, stdout io.Writer, stderr io.Writer) error {
 		Debug:      conf.Debug,
 	})
 
+	var c server.Cache
+	if conf.UseRedis {
+		logger.Info().Msg("using redis as the cache")
+		c, err = cache.NewRedisCache(ctx, &conf.Cache, &conf.RedisConfig, &logger)
+		if err != nil {
+			logger.Error().Err(err).Msg("error creating redis cache")
+			return err
+		}
+	} else {
+		logger.Info().Msg("using in-memory cache")
+		c = cache.NewCache[string](ctx, conf.Cache)
+	}
+
 	// creating server
-	c := cache.NewCache[string](ctx, conf.Cache)
 	srv := server.New(&logger, c)
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(conf.Host, conf.Port),
