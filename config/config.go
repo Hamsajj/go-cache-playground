@@ -2,8 +2,9 @@ package config
 
 import (
 	"fmt"
-	"github.com/kelseyhightower/envconfig"
 	"os"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
 type CacheConfig struct {
@@ -11,10 +12,18 @@ type CacheConfig struct {
 	EvictionIntervalMilliSec int `envconfig:"eviction_interval_ms" default:"1000"` // default is 1 second
 }
 type Config struct {
-	Debug bool        `envconfig:"debug" default:"false"`
-	Host  string      `envconfig:"host" default:"0.0.0.0"`
-	Port  string      `envconfig:"port" default:"8080"`
-	Cache CacheConfig // default is 30 minutes
+	Debug       bool   `envconfig:"debug" default:"false"`
+	Host        string `envconfig:"host" default:"0.0.0.0"`
+	Port        string `envconfig:"port" default:"8080"`
+	RedisConfig RedisConfig
+	Cache       CacheConfig // default is 30 minutes
+}
+
+type RedisConfig struct {
+	Host     string `envconfig:"host" default:"localhost"`
+	Username string `envconfig:"username" default:"localhost"`
+	Password string `envconfig:"password" default:""`
+	DB       int    `envconfig:"db" default:"0"`
 }
 
 func NewWithName(serviceName string) (Config, error) {

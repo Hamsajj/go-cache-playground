@@ -1,10 +1,11 @@
 package server
 
 import (
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"io"
 	"net/http"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
 )
 
 type Cache interface {
-	Set(key string, value string)
+	Set(key string, value string) error
 	Get(key string) (string, bool)
 }
 
@@ -69,7 +70,12 @@ func store(cache Cache, logger *zerolog.Logger) http.HandlerFunc {
 			http.Error(w, errBadRequestResponse, http.StatusBadRequest)
 			return
 		}
-		cache.Set(key, valueStr)
+		err = cache.Set(key, valueStr)
+		if err != nil {
+			logger.Error().Err(err).Msg("Failed to store value in cache")
+			http.Error(w, errInternalServerResponse, http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusCreated)
 	}
 }

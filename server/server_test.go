@@ -2,11 +2,12 @@ package server
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/rs/zerolog"
 )
 
 type mockCache struct {
@@ -16,11 +17,12 @@ type mockCache struct {
 	GetCalls []string
 }
 
-func (m *mockCache) Set(key string, value string) {
+func (m *mockCache) Set(key string, value string) error {
 	if m.SetCalls == nil {
 		m.SetCalls = make([][]string, 0, 1)
 	}
 	m.SetCalls = append(m.SetCalls, []string{key, value})
+	return nil
 }
 func (m *mockCache) Get(key string) (string, bool) {
 	if m.GetCalls == nil {

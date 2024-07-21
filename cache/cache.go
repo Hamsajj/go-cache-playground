@@ -2,10 +2,13 @@ package cache
 
 import (
 	"cache-api/config"
+	"cache-api/server"
 	"context"
 	"sync"
 	"time"
 )
+
+var _ server.Cache = &Cache[string]{}
 
 type Cache[T any] struct {
 	ctx context.Context
@@ -58,13 +61,14 @@ func NewCache[T any](ctx context.Context, conf config.CacheConfig) *Cache[T] {
 }
 
 // Set adds a new key-value pair to the cache
-func (c *Cache[T]) Set(key string, value T) {
+func (c *Cache[T]) Set(key string, value T) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.items[key] = cacheItem[T]{
 		value:     value,
 		expiresAt: time.Now().Add(c.ttl).UnixNano(),
 	}
+	return nil
 }
 
 // Get returns the value for the given key and a boolean indicating whether the key was found

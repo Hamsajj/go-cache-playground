@@ -46,11 +46,17 @@ func TestNewCache(t *testing.T) {
 
 func TestCache_Set(t *testing.T) {
 	cache := createNewCache()
-	cache.Set("key", "value")
+	err := cache.Set("key", "value")
+	if err != nil {
+		t.Fatalf("Expected no error but got %v", err)
+	}
 	assertValueExists(t, cache, "key", "value")
 
 	// re-write
-	cache.Set("key", "newValue")
+	err = cache.Set("key", "newValue")
+	if err != nil {
+		t.Fatalf("Expected no error for re-write but got %v", err)
+	}
 	assertValueExists(t, cache, "key", "newValue")
 
 }
@@ -230,6 +236,9 @@ func BenchmarkCache_SetWhileDeleteExpired(b *testing.B) {
 	b.StartTimer()
 	// set half of the items to be expired
 	for i := 0; i < b.N; i++ {
-		cache.Set(fmt.Sprintf("key%d", i), "value")
+		err := cache.Set(fmt.Sprintf("key%d", i), "value")
+		if err != nil {
+			b.Fatalf("Expected no error but got %v", err)
+		}
 	}
 }
