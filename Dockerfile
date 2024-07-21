@@ -16,7 +16,7 @@ COPY . ./
 RUN CGO_ENABLED=0 go build -v -o server.out
 
 
-FROM alpine
+FROM alpine:3.20
 
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /app/server.out /opt/app/
